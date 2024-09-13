@@ -4,11 +4,12 @@ WORKDIR /app
 
 COPY package*.json ./
 
+RUN npm install
+
 COPY . .
 
-RUN npm install
+RUN npm run build # Comando para compilar los archivos TypeScript
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
-
+CMD ["npm", "run", "start"]
