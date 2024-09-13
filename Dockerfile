@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build # Comando para compilar los archivos TypeScript
+RUN npm run build 
 
 EXPOSE 3000
 
