@@ -21,7 +21,7 @@ const swaggerOptions = {
       },
       {
         url: 'https://loyalty-zettas.onrender.com',
-        description: 'Server desplegado en vercel'
+        description: 'Server desplegado en Render'
       }
     ],
   },
@@ -36,5 +36,5 @@ console.log(JSON.stringify(specs, null, 2));
 // Middleware para servir la documentación Swagger
 export const setupSwagger = (app: express.Express) => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-  app.use('/api-docs', express.static(path.join(__dirname, 'public')));
+  app.use('/api-docs', express.static(path.join(__dirname, 'src')));
 };
