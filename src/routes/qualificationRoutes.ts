@@ -95,7 +95,7 @@ router.get('/qualificationsAll', getAllQualifications);
  *       201:
  *         description: Calificación creada
  */
-router.post('/qualifications', validateCreate, createQualifications);
+router.post('/qualifications', createQualifications);
 
 /**
  * @swagger

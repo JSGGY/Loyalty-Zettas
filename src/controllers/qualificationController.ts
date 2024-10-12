@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import { Request, Response } from "express";
 import { z } from 'zod';
 import {
   getAllQualifications as fetchAllQualifications,
@@ -39,7 +39,7 @@ const qualificationSchema = z.object({
   }),
 });
 
-export const getQualificationsIDs = async (req: IncomingMessage, res: ServerResponse) => {
+export const getQualificationsIDs = async (res: Response) => {
   try {
     const qualificationsIDs = await fetchAllQualificationsIDs();
     res.statusCode = 200;
@@ -59,7 +59,7 @@ export const getQualificationsIDs = async (req: IncomingMessage, res: ServerResp
 };
 
 
-export const getQualificationsByID = async (req: IncomingMessage, res: ServerResponse) => {
+export const getQualificationsByID = async (req: Request, res: Response) => {
   try {
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const id = url.pathname.split('/').pop() || '';
@@ -90,7 +90,7 @@ export const getQualificationsByID = async (req: IncomingMessage, res: ServerRes
   }
 };
 
-export const getAllQualifications = async (req: IncomingMessage, res: ServerResponse) => {
+export const getAllQualifications = async (res: Response) => {
   try {
     const qualifications = await fetchAllQualifications();
     res.statusCode = 200;
@@ -109,18 +109,20 @@ export const getAllQualifications = async (req: IncomingMessage, res: ServerResp
   }
 };
 
-export const createQualifications = async (req: IncomingMessage, res: ServerResponse) => {
+export const createQualifications = async (req: Request, res: Response) => {
   try {
-    const data = await parseRequestBody(req);
-    const parsedData = qualificationSchema.parse(data);
+    const parsedData = qualificationSchema.parse(req.body);
     const newQualifications = await addNewQualifications(parsedData);
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'application/json');
+
+    if (!newQualifications) {
+      return res.status(400).json({ message: "Los datos no pudieron ser procesados correctamente" });
+    }
     res.end(JSON.stringify({
       status: 201,
       message: 'Calificación creada correctamente',
       response: newQualifications,
-    }));
+    }))
+      ;
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       const simplifiedErrors = error.errors.map((err) => ({
@@ -144,7 +146,7 @@ export const createQualifications = async (req: IncomingMessage, res: ServerResp
   }
 };
 
-export const updateQualifications = async (req: IncomingMessage, res: ServerResponse) => {
+export const updateQualifications = async (req: Request, res: Response) => {
   try {
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const id = url.pathname.split('/').pop() || '';
@@ -177,7 +179,7 @@ export const updateQualifications = async (req: IncomingMessage, res: ServerResp
   }
 };
 
-export const deleteQualification = async (req: IncomingMessage, res: ServerResponse) => {
+export const deleteQualification = async (req: Request, res: Response) => {
   try {
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const id = url.pathname.split('/').pop() || '';
@@ -208,7 +210,7 @@ export const deleteQualification = async (req: IncomingMessage, res: ServerRespo
   }
 };
 
-const parseRequestBody = (req: IncomingMessage): Promise<any> => {
+const parseRequestBody = (req: Request): Promise<any> => {
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', (chunk) => {

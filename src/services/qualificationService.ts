@@ -24,7 +24,7 @@ export const getQualificationsByID = async (id: number) => {
     });
 
     if (!qualification) {
-      return null; 
+      return null;
     }
 
     return qualification;
@@ -46,30 +46,60 @@ export const getAllQualifications = async () => {
 };
 
 export const createQualifications = async (data: any) => {
-  const qualification = await prisma.qualification.create({
-    data: {
-      ...data,
-      qualityCalification: {
-        create: data.qualityCalification
-      },
-      timeCalification: {
-        create: data.timeCalification
-      },
-      packagingCalification: {
-        create: data.packagingCalification
-      },
-      communicationCalification: {
-        create: data.communicationCalification
+  try {
+    const validateScore = (score: number): number => {
+      return Math.min(Math.max(score, 0), 5);
+    };
+
+    const generalScore = validateScore(parseFloat(data.generalScore.text) || 0);
+    const qualityScore = validateScore(parseInt(data.qualityCalification.text, 10) || 0);
+    const timeScore = validateScore(parseInt(data.timeCalification.text, 10) || 0);
+    const packagingScore = validateScore(parseInt(data.packagingCalification.text, 10) || 0);
+    const communicationScore = validateScore(parseInt(data.communicationCalification.text, 10) || 0);
+
+    const qualification = await prisma.qualification.create({
+      data: {
+        donationId: data.donationId,
+        donatorId: data.donatorId,
+        organizationId: data.organizationId,
+        generalScore: generalScore,
+        notes: data.notes || "",
+
+        qualityCalification: {
+          create: {
+            score: qualityScore,
+            comments: data.qualityCalification.comments || "",
+          }
+        },
+
+        timeCalification: {
+          create: {
+            score: timeScore,
+            comments: data.timeCalification.comments || "",
+          }
+        },
+
+        packagingCalification: {
+          create: {
+            score: packagingScore,
+            comments: data.packagingCalification.comments || "",
+          }
+        },
+
+        communicationCalification: {
+          create: {
+            score: communicationScore,
+            comments: data.communicationCalification.comments || "",
+          }
+        }
       }
-    },
-    include: {
-      qualityCalification: true,
-      timeCalification: true,
-      packagingCalification: true,
-      communicationCalification: true,
-    },
-  });
-  return qualification;
+    });
+
+    return qualification;
+  } catch (error: any) {
+    console.error("Error al crear la calificación: ", error);
+    throw new Error("No se pudo crear la calificación. Verifique los datos e intente nuevamente.");
+  }
 };
 
 export const updateQualifications = async (id: number, data: any) => {
@@ -125,11 +155,11 @@ export const deleteQualification = async (id: number) => {
 
   return await prisma.qualification.delete({
     where: { id },
-      include: {
-        qualityCalification: true,
-        timeCalification: true,
-        packagingCalification: true,
-        communicationCalification: true,
-      },
+    include: {
+      qualityCalification: true,
+      timeCalification: true,
+      packagingCalification: true,
+      communicationCalification: true,
+    },
   });
 };
