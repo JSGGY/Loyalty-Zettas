@@ -50,11 +50,11 @@ export const getQualificationsIDs = async (res: Response) => {
       response: qualificationsIDs,
     }));
   } catch (error) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
-      status: 500,
-      message: 'Error al obtener las IDs',
-    }));
+    // res.statusCode = 500;
+    // res.end(JSON.stringify({
+    //   status: 500,
+    //   message: 'Error al obtener las IDs',
+    // }));
   }
 };
 
