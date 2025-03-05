@@ -39,22 +39,21 @@ const qualificationSchema = z.object({
   }),
 });
 
-export const getQualificationsIDs = async (res: Response) => {
+export const getQualificationsIDs = async (req: Request, res: Response) => {
   try {
     const qualificationsIDs = await fetchAllQualificationsIDs();
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
+
+    res.status(200).json({
       status: 200,
-      message: 'IDs obtenidos correctamente',
+      message: 'Todas las calificaciones obtenidas correctamente',
       response: qualificationsIDs,
-    }));
-  } catch (error) {
-    // res.statusCode = 500;
-    // res.end(JSON.stringify({
-    //   status: 500,
-    //   message: 'Error al obtener las IDs',
-    // }));
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 500,
+      message: 'Error al obtener las calificaciones',
+      error: error.message || 'Error interno del servidor',
+    });
   }
 };
 
@@ -67,45 +66,42 @@ export const getQualificationsByID = async (req: Request, res: Response) => {
 
     const qualifications = await fetchAllQualificationsByID(parsedId);
     if (!qualifications) {
-      res.statusCode = 404;
-      return res.end(JSON.stringify({
+      res.status(404).json({
         status: 404,
-        message: 'No se encontraron calificaciones con el ID proporcionado',
-      }));
+        message: 'No se encontró la calificación',
+      });
+
+    } else {
+      res.status(200).json({
+        status: 200,
+        message: 'Todas las calificaciones obtenidas correctamente',
+        response: qualifications,
+      });
     }
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
-      status: 200,
-      message: 'Calificación obtenida correctamente',
-      response: qualifications,
-    }));
+
   } catch (error: any) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
+    res.status(500).json({
       status: 500,
-      message: 'Error al obtener la calificación',
-      errors: error.message || 'Error interno del servidor',
-    }));
+      message: 'Error al obtener las calificaciones',
+      error: error.message || 'Error interno del servidor',
+    });
   }
 };
 
-export const getAllQualifications = async (res: Response) => {
+export const getAllQualifications = async (req: Request, res: Response) => {
   try {
     const qualifications = await fetchAllQualifications();
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
+    res.status(200).json({
       status: 200,
       message: 'Todas las calificaciones obtenidas correctamente',
       response: qualifications,
-    }));
-  } catch (error) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
+    });
+  } catch (error: any) {
+    res.status(500).json({
       status: 500,
       message: 'Error al obtener las calificaciones',
-    }));
+      error: error.message || 'Error interno del servidor',
+    });
   }
 };
 
@@ -117,12 +113,11 @@ export const createQualifications = async (req: Request, res: Response) => {
     if (!newQualifications) {
       return res.status(400).json({ message: "Los datos no pudieron ser procesados correctamente" });
     }
-    res.end(JSON.stringify({
-      status: 201,
+    res.status(200).json({
+      status: 200,
       message: 'Calificación creada correctamente',
       response: newQualifications,
-    }))
-      ;
+    });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       const simplifiedErrors = error.errors.map((err) => ({
@@ -130,83 +125,91 @@ export const createQualifications = async (req: Request, res: Response) => {
         message: `${err.path.join('.')} es incorrecta`,
       }));
 
-      res.statusCode = 400;
-      res.end(JSON.stringify({
-        status: 400,
-        message: 'Error al crear la calificación',
-        errors: simplifiedErrors,
-      }));
     } else {
-      res.statusCode = 500;
-      res.end(JSON.stringify({
+      res.status(500).json({
         status: 500,
-        message: 'Error interno del servidor',
-      }));
+        message: 'Error al crear las calificaciones',
+        error: error.message || 'Error interno del servidor',
+      });
     }
   }
 };
 
 export const updateQualifications = async (req: Request, res: Response) => {
   try {
-    const url = new URL(req.url || '', `http://${req.headers.host}`);
-    const id = url.pathname.split('/').pop() || '';
+    // Obtener el ID desde los parámetros de la URL
+    const id = req.params.id;
     const parsedId = idSchema.parse(id);
-    const data = await parseRequestBody(req);
-    const parsedData = qualificationSchema.partial().parse(data);
 
-    const updatedQualification = await modifyQualifications(parsedId, parsedData);
-    if (!updatedQualification) {
-      res.statusCode = 404;
-      return res.end(JSON.stringify({
-        status: 404,
-        message: 'No se puede actualizar, el ID no existe',
-      }));
+    // Validar el cuerpo de la solicitud
+    const parsedData = qualificationSchema.safeParse(req.body);
+    if (!parsedData.success) {
+      return res.status(400).json({
+        status: 400,
+        message: "Datos de actualización no válidos",
+        errors: parsedData.error.format(),
+      });
     }
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
+
+    // Actualizar la calificación
+    const updatedQualification = await modifyQualifications(parsedId, parsedData.data);
+    if (!updatedQualification) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontró la calificación con ese ID",
+      });
+    }
+
+    res.status(200).json({
       status: 200,
-      message: 'Datos actualizados correctamente',
+      message: 'La calificación ha sido actualizada correctamente',
       response: updatedQualification,
-    }));
+    });
+
   } catch (error: any) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
+    res.status(500).json({
       status: 500,
       message: 'Error al actualizar la calificación',
-      errors: error.message || 'Error interno del servidor',
-    }));
+      error: error.message || 'Error interno del servidor',
+    });
   }
 };
 
 export const deleteQualification = async (req: Request, res: Response) => {
   try {
-    const url = new URL(req.url || '', `http://${req.headers.host}`);
-    const id = url.pathname.split('/').pop() || '';
-    const parsedId = idSchema.parse(id);
+    // Obtener el ID desde los parámetros de la URL
+    const id = req.params.id;
+    const parsedId = idSchema.safeParse(id);
 
-    const deletedQualification = await removeQualification(parsedId);
-    if (!deletedQualification) {
-      res.statusCode = 404;
-      return res.end(JSON.stringify({
-        status: 404,
-        message: 'No se puede eliminar, el ID no existe',
-      }));
+    if (!parsedId.success) {
+      return res.status(400).json({
+        status: 400,
+        message: "ID no válido",
+        errors: parsedId.error.format(),
+      });
     }
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
+
+    // Intentar eliminar la calificación
+    const deletedQualification = await removeQualification(parsedId.data);
+    if (!deletedQualification) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontró la calificación con ese ID",
+      });
+    }
+
+    res.status(200).json({
       status: 200,
-      message: 'Eliminación exitosa',
+      message: 'La calificación ha sido eliminada correctamente',
       response: deletedQualification,
-    }));
+    });
+
   } catch (error: any) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
+    res.status(500).json({
       status: 500,
       message: 'Error al eliminar la calificación',
-      errors: error.message || 'Error interno del servidor',
-    }));
+      error: error.message || 'Error interno del servidor',
+    });
   }
 };
 
