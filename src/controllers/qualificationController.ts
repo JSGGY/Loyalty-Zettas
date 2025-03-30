@@ -45,13 +45,13 @@ export const getQualificationsIDs = async (req: Request, res: Response) => {
 
     res.status(200).json({
       status: 200,
-      message: 'Todas las calificaciones obtenidas correctamente',
+      message: 'IDs de calificaciones obtenidos correctamente',
       response: qualificationsIDs,
     });
   } catch (error: any) {
     res.status(500).json({
       status: 500,
-      message: 'Error al obtener las calificaciones',
+      message: 'Error al obtener los IDs',
       error: error.message || 'Error interno del servidor',
     });
   }

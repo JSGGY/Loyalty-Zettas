@@ -27,6 +27,8 @@ const router = express.Router();
  *               type: array
  *               items:
  *                 type: string
+ *       500:
+ *         description: No se encontraron los IDs de calificaciones
  */
 router.get('/qualificationsIDs', getQualificationsIDs);
 
@@ -40,21 +42,18 @@ router.get('/qualificationsIDs', getQualificationsIDs);
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID de la calificación
+ *         description: ID de la calificación a obtener
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Información de la calificación
+ *         description: Calificación obtenida correctamente
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 score:
- *                   type: integer
+ *               $ref: '#/components/schemas/getQualification'
+ *       404:
+ *         description: No se encontró la calificación
  */
 router.get('/qualifications/:id', getQualificationsByID);
 
@@ -66,13 +65,15 @@ router.get('/qualifications/:id', getQualificationsByID);
  *     tags: [Qualifications]
  *     responses:
  *       200:
- *         description: Lista de calificaciones
+ *         description: Todas las calificaciones obtenidas correctamente
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 type: object
+ *                 $ref: '#/components/schemas/getQualification'
+ *       500:
+ *         description: Error al obtener las calificaciones
  */
 router.get('/qualificationsAll', getAllQualifications);
 
@@ -87,15 +88,16 @@ router.get('/qualificationsAll', getAllQualifications);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               score:
- *                 type: integer
+ *             $ref: '#/components/schemas/Qualification'
  *     responses:
  *       201:
- *         description: Calificación creada
+ *         description: Calificación creada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Qualification'
  */
-router.post('/qualifications', createQualifications); //
+router.post('/qualifications', createQualifications);
 
 /**
  * @swagger
@@ -107,7 +109,7 @@ router.post('/qualifications', createQualifications); //
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID de la calificación
+ *         description: ID de la calificación a actualizar
  *         schema:
  *           type: string
  *     requestBody:
@@ -115,13 +117,16 @@ router.post('/qualifications', createQualifications); //
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               score:
- *                 type: integer
+ *             $ref: '#/components/schemas/Qualification'
  *     responses:
  *       200:
- *         description: Calificación actualizada
+ *         description: Calificación actualizada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Qualification'
+ *       404:
+ *         description: No se encontró la calificación
  */
 router.put('/qualifications/:id', validateCreate, updateQualifications);
 
@@ -135,13 +140,117 @@ router.put('/qualifications/:id', validateCreate, updateQualifications);
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID de la calificación
+ *         description: ID de la calificación a eliminar
  *         schema:
  *           type: string
  *     responses:
- *       204:
- *         description: Calificación eliminada
+ *       200:
+ *         description: Calificación eliminada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Calificación eliminada correctamente"
+ *       404:
+ *         description: No se encontró la calificación
  */
 router.delete('/qualifications/:id', deleteQualification);
+
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Qualification:
+ *       type: object
+ *       properties:
+ *         donationId:
+ *           type: string
+ *         donatorId:
+ *           type: string
+ *         organizationId:
+ *           type: string
+ *         generalScore:
+ *           type: integer
+ *         notes:
+ *           type: string
+ *         qualityCalification:
+ *           type: object
+ *           properties:
+ *             score:
+ *               type: integer
+ *             comments:
+ *               type: string
+ *         timeCalification:
+ *           type: object
+ *           properties:
+ *             score:
+ *               type: integer
+ *             comments:
+ *               type: string
+ *         packagingCalification:
+ *           type: object
+ *           properties:
+ *             score:
+ *               type: integer
+ *             comments:
+ *               type: string
+ *         communicationCalification:
+ *           type: object
+ *           properties:
+ *             score:
+ *               type: integer
+ *             comments:
+ *               type: string
+ *     getQualification:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         donationId:
+ *           type: string
+ *         donatorId:
+ *           type: string
+ *         organizationId:
+ *           type: string
+ *         qualityCalificationId:
+ *           type: integer
+ *         timeCalificationId:
+ *           type: integer
+ *         packagingCalificationId:
+ *           type: integer
+ *         communicationCalificationId:
+ *           type: integer
+ *         generalScore:
+ *           type: integer
+ *         notes:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         qualityCalification:
+ *           $ref: '#/components/schemas/CalificationDetail'
+ *         timeCalification:
+ *           $ref: '#/components/schemas/CalificationDetail'
+ *         packagingCalification:
+ *           $ref: '#/components/schemas/CalificationDetail'
+ *         communicationCalification:
+ *           $ref: '#/components/schemas/CalificationDetail'
+ *     CalificationDetail:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         score:
+ *           type: integer
+ *         comments:
+ *           type: string
+ */
 
 export default router;

@@ -10,9 +10,9 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Mi API',
+      title: 'MS LOYALTY BAQ',
       version: '1.0.0',
-      description: 'Documentación de la API hecha por Loyalty en TypeScript...'
+      description: 'Documentación API MS Loyalty BAQ',
     },
     servers: [
       {
