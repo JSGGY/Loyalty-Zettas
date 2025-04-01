@@ -15,6 +15,10 @@ setupSwagger(app);
 // Configura las rutas
 app.use('/api', qualificationRoutes); // Usa el enrutador para manejar las rutas bajo '/api'
 
+app.get('/loyalty', (req: express.Request, res: express.Response) => {
+  res.json({ message: 'Loyalty funcionando correctamente' });
+});
+
 // Middleware para manejar rutas no encontradas (404)
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Not Found' });
