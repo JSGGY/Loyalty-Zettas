@@ -19,6 +19,17 @@ app.get('/loyalty', (req: express.Request, res: express.Response) => {
   res.json({ message: 'Loyalty funcionando correctamente' });
 });
 
+app.get('/external-donations', async (req, res) => {
+  try {
+    const response = await fetch('http://26.76.200.87:3000/api/connect');
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error al consumir la API externa:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener las donaciones' });
+  }
+});
+
 // Middleware para manejar rutas no encontradas (404)
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Not Found' });

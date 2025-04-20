@@ -1,9 +1,11 @@
 // src/routes/qualificationRoutes.ts
 import express from 'express';
-import { getQualificationsByID, createQualifications, updateQualifications, deleteQualification, getQualificationsIDs, getAllQualifications } from '../controllers/qualificationController';
+import { getQualificationsByID, createQualifications, updateQualifications, deleteQualification, getQualificationsIDs, getAllQualifications, getAverageQualificationByCompanyId } from '../controllers/qualificationController';
 import { validateCreate } from '../validators/qualificationValidator';
 
 const router = express.Router();
+
+
 
 /**
  * @swagger
@@ -31,6 +33,34 @@ const router = express.Router();
  *         description: No se encontraron los IDs de calificaciones
  */
 router.get('/qualificationsIDs', getQualificationsIDs);
+
+/**
+ * @swagger
+ * /api/qualifications/average/{companyId}:
+ *   get:
+ *     summary: Obtiene 2 promedios de calificaciones por ID de compañía, tanto  general como de calidad
+ *     tags: [Qualifications]
+ *     parameters:
+ *       - name: companyId
+ *         in: path
+ *         required: true
+ *         description: ID de la compañía para calcular el promedio de calificaciones
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Promedio de calificaciones obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 averageGeneralScore:
+ *                   type: number
+ *                 averageQualityScore:
+ *                   type: number
+ */
+router.get('/qualifications/average/:companyId', getAverageQualificationByCompanyId)
 
 /**
  * @swagger
@@ -97,7 +127,7 @@ router.get('/qualificationsAll', getAllQualifications);
  *             schema:
  *               $ref: '#/components/schemas/Qualification'
  */
-router.post('/qualifications', createQualifications);
+router.post('/qualifications', validateCreate, createQualifications);
 
 /**
  * @swagger

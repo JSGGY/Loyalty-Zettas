@@ -7,6 +7,7 @@ import {
   deleteQualification as removeQualification,
   getQualificationsIDs as fetchAllQualificationsIDs,
   getQualificationsByID as fetchAllQualificationsByID,
+  getAverageQualificationByCompanyId as fetchAverageQualificationByCompanyId,
 } from '../services/qualificationService';
 
 // Esquemas para validar el ID, lo transforma de string a número
@@ -17,7 +18,7 @@ const idSchema = z.string().transform((val) => parseInt(val, 10)).refine((val) =
 // Define el qualificationSchema
 const qualificationSchema = z.object({
   donationId: z.string(),
-  donatorId: z.string(),
+  companyId: z.string(),
   organizationId: z.string(),
   generalScore: z.number().min(0).max(5),
   notes: z.string(),
@@ -25,21 +26,49 @@ const qualificationSchema = z.object({
     score: z.number().min(0).max(5),
     comments: z.string(),
   }),
-  timeCalification: z.object({
-    score: z.number().min(0).max(5),
-    comments: z.string(),
-  }),
-  packagingCalification: z.object({
-    score: z.number().min(0).max(5),
-    comments: z.string(),
-  }),
-  communicationCalification: z.object({
-    score: z.number().min(0).max(5),
-    comments: z.string(),
-  }),
+
 });
 
-export const getQualificationsIDs = async (req: Request, res: Response) => {
+export const getAverageQualificationByCompanyId = async (req: Request, res: Response) => {
+  try {
+    const { companyId } = req.params;
+
+    const qualifications = await fetchAverageQualificationByCompanyId(companyId);
+    if (qualifications.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: 'No se encontraron calificaciones para esta compañía',
+      });
+    }
+
+    // Calcula el promedio de generalScore
+    const totalGeneralScore = qualifications.reduce((sum, q) => sum + q.generalScore, 0);
+    const averageGeneralScore = totalGeneralScore / qualifications.length;
+
+    // Calcula el promedio de qualityCalification.score
+    const totalQualityScore = qualifications.reduce((sum, q) => sum + (q.qualityCalification?.score || 0), 0);
+    const averageQualityScore = totalQualityScore / qualifications.length;
+
+    // Devuelve los promedios
+    res.status(200).json({
+      status: 200,
+      message: 'Promedios calculados correctamente',
+      data: {
+        averageGeneralScore,
+        averageQualityScore,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error al calcular los promedios:', error);
+    res.status(500).json({
+      status: 500,
+      message: 'Error al calcular los promedios',
+      error: error.message || 'Error interno del servidor',
+    });
+  }
+};
+
+export const getQualificationsIDs = async (res: Response) => {
   try {
     const qualificationsIDs = await fetchAllQualificationsIDs();
 
@@ -88,7 +117,7 @@ export const getQualificationsByID = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllQualifications = async (req: Request, res: Response) => {
+export const getAllQualifications = async (res: Response) => {
   try {
     const qualifications = await fetchAllQualifications();
     res.status(200).json({

@@ -1,23 +1,11 @@
 {
     "donationId": "donation999",
-    "donatorId": "donator666",
+    "companyId": "donator666",
     "organizationId": "organization333",
     "generalScore": 2,
     "notes": "Interesantes condiciones.",
     "qualityCalification": {
         "score": 3,
         "comments": "Satisfacción garantizada."
-    },
-    "timeCalification": {
-        "score": 4,
-        "comments": "Por poco no fue perfecto"
-    },
-    "packagingCalification": {
-        "score": 5,
-        "comments": "Esto fue muy satisfactorio"
-    },
-    "communicationCalification": {
-        "score": 5,
-        "comments": "Todo muy genial."
     }
 }

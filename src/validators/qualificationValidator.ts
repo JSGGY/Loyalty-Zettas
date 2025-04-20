@@ -3,23 +3,11 @@ import { CustomRequest, CustomResponse } from '../interfaces/customReqRes';
 
 const qualificationSchema = z.object({
   donationId: z.string(),
-  donatorId: z.string(),
+  companyId: z.string(),
   organizationId: z.string(),
-  generalScore: z.number().int().min(1).max(10),
+  generalScore: z.number().int().min(1).max(5),
   notes: z.string().optional(),
   qualityCalification: z.object({
-    score: z.number().int().min(1).max(5),
-    comments: z.string().optional(),
-  }).optional(),
-  timeCalification: z.object({
-    score: z.number().int().min(1).max(5),
-    comments: z.string().optional(),
-  }).optional(),
-  packagingCalification: z.object({
-    score: z.number().int().min(1).max(5),
-    comments: z.string().optional(),
-  }).optional(),
-  communicationCalification: z.object({
     score: z.number().int().min(1).max(5),
     comments: z.string().optional(),
   }).optional(),
@@ -33,14 +21,11 @@ export const validateCreate = (req: CustomRequest, res: CustomResponse, next: Fu
     // Validar las claves permitidas
     const allowedKeys = [
       'donationId',
-      'donatorId',
+      'companyId',
       'organizationId',
       'generalScore',
       'notes',
       'qualityCalification',
-      'timeCalification',
-      'packagingCalification',
-      'communicationCalification',
     ];
 
     const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
